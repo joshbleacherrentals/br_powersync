@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://unpkg.com/@powersync/service-sync-rules@latest/schema/sync_rules.json
+#
+# See Documentation for more information:
+# https://docs.powersync.com/usage/sync-rules
+#
+# Note that changes to this file are not watched.
+# The service needs to be restarted for changes to take effect.
+
+bucket_definitions:
+  web:
+    parameters: |
+      select 'web' as app
+      where (request.parameters() ->> 'app') = 'web'
+    data:
+      - SELECT * FROM "AccountManagers" WHERE bucket.app = 'web'
+      - SELECT * FROM "Addresses" WHERE bucket.app = 'web'
+      - SELECT * FROM "BleacherEvents" WHERE bucket.app = 'web'
+      - SELECT * FROM "BleacherUsers" WHERE bucket.app = 'web'
+      - SELECT * FROM "Bleachers" WHERE bucket.app = 'web'
+      - SELECT * FROM "Blocks" WHERE bucket.app = 'web'
+      - SELECT * FROM "Drivers" WHERE bucket.app = 'web'
+      - SELECT * FROM "Events" WHERE bucket.app = 'web'
+      - SELECT * FROM "HomeBases" WHERE bucket.app = 'web'
+      - SELECT * FROM "TaskStatuses" WHERE bucket.app = 'web'
+      - SELECT * FROM "TaskTypes" WHERE bucket.app = 'web'
+      - SELECT * FROM "Tasks" WHERE bucket.app = 'web'
+      - SELECT * FROM "UserHomeBases" WHERE bucket.app = 'web'
+      - SELECT * FROM "UserRoles" WHERE bucket.app = 'web'
+      - SELECT * FROM "UserStatuses" WHERE bucket.app = 'web'
+      - SELECT * FROM "Users" WHERE bucket.app = 'web'
+      - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'web'
+
+  mobile:
+    parameters: |
+      select 'mobile' as app
+      where (request.parameters() ->> 'app') = 'mobile'
+    data:
+      - SELECT * FROM "Users" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'mobile'
