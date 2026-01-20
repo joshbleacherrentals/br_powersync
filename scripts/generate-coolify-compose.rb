@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "yaml"
+
+ROOT = File.expand_path("..", __dir__)
+
+SOURCE_PATH = File.join(ROOT, "docker-compose.yml")
+OUTPUT_PATH = File.join(ROOT, "docker-compose.coolify.yml")
+
+# Deep merge hashes. Arrays are replaced (not concatenated) because compose arrays
+# like `volumes:` should be overridden by the more specific file.
+#
+# For our repo:
+# - docker-compose.yml is the root entrypoint
+# - include files provide additional services/volumes
+# - extends files provide base service definitions
+
+def deep_merge(base, override)
+  return override if base.nil?
+  return base if override.nil?
+
+  if base.is_a?(Hash) && override.is_a?(Hash)
+    merged = base.dup
+    override.each do |k, v|
+      merged[k] = deep_merge(base[k], v)
+    end
+    merged
+  else
+    # Arrays + scalars: override completely
+    override
+  end
+end
+
+def load_yaml(path)
+  YAML.safe_load(File.read(path), aliases: true) || {}
+end
+
+root = load_yaml(SOURCE_PATH)
+
+# Resolve `include:` by merging included docs first, then root overrides.
+includes = root.delete("include") || []
+merged_from_includes = {}
+
+includes.each do |entry|
+  next unless entry.is_a?(Hash) && entry["path"]
+
+  include_path = File.expand_path(entry["path"], ROOT)
+  included = load_yaml(include_path)
+  merged_from_includes = deep_merge(merged_from_includes, included)
+end
+
+compose = deep_merge(merged_from_includes, root)
+
+services = compose["services"] || {}
+
+# Resolve `extends:` inside services.
+services.each do |_name, service|
+  next unless service.is_a?(Hash) && service["extends"].is_a?(Hash)
+
+  extends = service.delete("extends")
+  file = extends["file"]
+  service_name = extends["service"]
+
+  next unless file && service_name
+
+  extends_path = File.expand_path(file, ROOT)
+  extends_doc = load_yaml(extends_path)
+  base_service = extends_doc.dig("services", service_name)
+
+  unless base_service
+    warn("Could not resolve extends service '#{service_name}' in #{file}")
+    next
+  end
+
+  # Base service comes first, then service overrides.
+  merged_service = deep_merge(base_service, service)
+
+  service.clear
+  merged_service.each { |k, v| service[k] = v }
+end
+
+# Remove local-only external Supabase docker network references.
+# (Production PowerSync connects to Supabase over the internet via PS_DATA_SOURCE_URI.)
+
+def remove_network_reference!(compose, network_name)
+  networks = compose["networks"]
+  networks&.delete(network_name)
+
+  (compose["services"] || {}).each_value do |svc|
+    next unless svc.is_a?(Hash)
+
+    svc_networks = svc["networks"]
+    case svc_networks
+    when Array
+      svc_networks.delete(network_name)
+      svc.delete("networks") if svc_networks.empty?
+    when Hash
+      svc_networks.delete(network_name)
+      svc.delete("networks") if svc_networks.empty?
+    end
+  end
+end
+
+remove_network_reference!(compose, "supabase_network_bleacher_rentals")
+
+# Also remove any other supabase external networks that might be present.
+(compose["networks"] || {}).keys.grep(/^supabase_network_/).each do |name|
+  remove_network_reference!(compose, name)
+end
+
+# Normalize the PowerSync service env to be Coolify-friendly.
+# The upstream service definition hardcodes PS_MONGO_URI, but we want it to come from Coolify env vars.
+powersync_env = compose.dig("services", "powersync", "environment")
+if powersync_env.is_a?(Hash) && powersync_env["PS_MONGO_URI"] && !powersync_env["PS_MONGO_URI"].to_s.include?("${")
+  powersync_env["PS_MONGO_URI"] = "${PS_MONGO_URI}"
+end
+
+# Ensure output has no `include` and no `extends`.
+
+File.write(OUTPUT_PATH, YAML.dump(compose))
+
+puts("Wrote #{OUTPUT_PATH}")
