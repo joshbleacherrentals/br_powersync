@@ -23,6 +23,12 @@
 #   We intentionally DO NOT publish host ports here. Coolify's proxy should route
 #   ps-dev/ps-staging/ps-prod subdomains to the internal container port.
 #
+# Networking:
+#   Supabase hosted Postgres direct DB endpoints are IPv6-only.
+#   This compose enables IPv6 on the default Docker network.
+#   If you run multiple environments on the same host, set `PS_IPV6_SUBNET` per
+#   resource to a distinct /64 to avoid overlaps.
+#
 # Config delivery:
 #   Coolify cannot reliably bind-mount repo files into running containers.
 #   This compose embeds config/powersync.yaml (with sync rules inlined) into
@@ -78,4 +84,9 @@ services:
     - default
 volumes:
   mongo_storage:
-networks: {}
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+      - subnet: "${PS_IPV6_SUBNET:-fd00:dead:beef:1::/64}"
