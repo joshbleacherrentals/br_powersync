@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "yaml"
+require "base64"
 
 ROOT = File.expand_path("..", __dir__)
 
@@ -37,6 +38,33 @@ def load_yaml(path)
 end
 
 root = load_yaml(SOURCE_PATH)
+
+POWERSYNC_CONFIG_FILE = File.join(ROOT, "config", "powersync.yaml")
+SYNC_RULES_FILE = File.join(ROOT, "config", "sync_rules.yaml")
+
+def indent_lines(text, spaces)
+  pad = " " * spaces
+  text.split("\n", -1).map { |line| pad + line }.join("\n")
+end
+
+def inline_sync_rules_in_config(powersync_yaml:, sync_rules_yaml:)
+  inlined = powersync_yaml.dup
+
+  replacement = "sync_rules:\n  content: |\n" + indent_lines(sync_rules_yaml.rstrip, 4) + "\n"
+
+  # Replace the simple file reference with an inline block.
+  # Expected source snippet:
+  #   sync_rules:\n  #     path: sync_rules.yaml
+  #
+  # Keep this intentionally strict so we don't mangle unrelated YAML.
+  pattern = /^sync_rules:\n\s*path:\s*[^\n]+\n/m
+
+  unless inlined.match?(pattern)
+    raise "Could not find sync_rules.path in config/powersync.yaml to inline"
+  end
+
+  inlined.sub(pattern, replacement)
+end
 
 # Resolve `include:` by merging included docs first, then root overrides.
 includes = root.delete("include") || []
@@ -111,9 +139,30 @@ end
 
 # Normalize the PowerSync service env to be Coolify-friendly.
 # The upstream service definition hardcodes PS_MONGO_URI, but we want it to come from Coolify env vars.
+powersync_service = compose.dig("services", "powersync")
 powersync_env = compose.dig("services", "powersync", "environment")
-if powersync_env.is_a?(Hash) && powersync_env["PS_MONGO_URI"] && !powersync_env["PS_MONGO_URI"].to_s.include?("${")
-  powersync_env["PS_MONGO_URI"] = "${PS_MONGO_URI}"
+
+if powersync_env.is_a?(Hash)
+  if powersync_env["PS_MONGO_URI"] && !powersync_env["PS_MONGO_URI"].to_s.include?("${")
+    powersync_env["PS_MONGO_URI"] = "${PS_MONGO_URI}"
+  end
+
+  # Coolify cannot reliably bind-mount repo files into containers at runtime.
+  # Instead, embed the config as base64 and let PowerSync decode it.
+  powersync_yaml = File.read(POWERSYNC_CONFIG_FILE)
+  sync_rules_yaml = File.read(SYNC_RULES_FILE)
+  config_with_inline_rules = inline_sync_rules_in_config(
+    powersync_yaml: powersync_yaml,
+    sync_rules_yaml: sync_rules_yaml
+  )
+
+  powersync_env.delete("POWERSYNC_CONFIG_PATH")
+  powersync_env["POWERSYNC_CONFIG_B64"] = Base64.strict_encode64(config_with_inline_rules)
+end
+
+# Remove bind mounts that reference repo paths.
+if powersync_service.is_a?(Hash)
+  powersync_service.delete("volumes")
 end
 
 # Coolify runs multiple compose resources on the same host.
@@ -149,6 +198,11 @@ header = <<~HEADER
   # Coolify routing:
   #   We intentionally DO NOT publish host ports here. Coolify's proxy should route
   #   ps-dev/ps-staging/ps-prod subdomains to the internal container port.
+  #
+  # Config delivery:
+  #   Coolify cannot reliably bind-mount repo files into running containers.
+  #   This compose embeds config/powersync.yaml (with sync rules inlined) into
+  #   POWERSYNC_CONFIG_B64 so the service can boot without filesystem mounts.
   # -----------------------------------------------------------------------------
 
 HEADER
