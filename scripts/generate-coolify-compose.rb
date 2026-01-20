@@ -176,26 +176,18 @@ end
 # Supabase hosted Postgres direct connection endpoints are IPv6-only.
 # Enable IPv6 on the default Docker network so containers can reach db.<ref>.supabase.co.
 #
-# IMPORTANT: If you run dev/staging/prod on the same host, use a distinct /64 per Coolify resource
-# to avoid overlapping networks. Set this in Coolify as `PS_IPV6_SUBNET`.
+# NOTE:
+# We intentionally do NOT hardcode an IPv6 subnet here.
+# Docker will auto-allocate a non-overlapping /64 for each network, which avoids
+# "Pool overlaps" errors when Coolify creates/recreates networks.
 compose["networks"] = {} unless compose["networks"].is_a?(Hash)
 
 default_network = compose["networks"]["default"]
 default_network = {} unless default_network.is_a?(Hash)
 
 default_network["enable_ipv6"] = true
-
-default_network["ipam"] = {} unless default_network["ipam"].is_a?(Hash)
-
-default_network["ipam"]["config"] = [] unless default_network["ipam"]["config"].is_a?(Array)
-
-ipv6_subnet = "${PS_IPV6_SUBNET:-fd00:dead:beef:1::/64}"
-
-has_ipv6_subnet = default_network["ipam"]["config"].any? do |entry|
-  entry.is_a?(Hash) && entry["subnet"].to_s.include?(":")
-end
-
-default_network["ipam"]["config"] << { "subnet" => ipv6_subnet } unless has_ipv6_subnet
+# If a source compose defined custom IPAM, drop it for Coolify to prevent overlaps.
+default_network.delete("ipam")
 
 compose["networks"]["default"] = default_network
 
@@ -228,8 +220,7 @@ header = <<~HEADER
   # Networking:
   #   Supabase hosted Postgres direct DB endpoints are IPv6-only.
   #   This compose enables IPv6 on the default Docker network.
-  #   If you run multiple environments on the same host, set `PS_IPV6_SUBNET` per
-  #   resource to a distinct /64 to avoid overlaps.
+  #   We do not hardcode an IPv6 subnet; Docker auto-allocates one per network.
   #
   # Config delivery:
   #   Coolify cannot reliably bind-mount repo files into running containers.

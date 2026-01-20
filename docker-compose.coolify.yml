@@ -26,8 +26,7 @@
 # Networking:
 #   Supabase hosted Postgres direct DB endpoints are IPv6-only.
 #   This compose enables IPv6 on the default Docker network.
-#   If you run multiple environments on the same host, set `PS_IPV6_SUBNET` per
-#   resource to a distinct /64 to avoid overlaps.
+#   We do not hardcode an IPv6 subnet; Docker auto-allocates one per network.
 #
 # Config delivery:
 #   Coolify cannot reliably bind-mount repo files into running containers.
@@ -87,6 +86,3 @@ volumes:
 networks:
   default:
     enable_ipv6: true
-    ipam:
-      config:
-      - subnet: "${PS_IPV6_SUBNET:-fd00:dead:beef:1::/64}"
