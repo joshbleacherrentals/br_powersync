@@ -153,6 +153,11 @@ header = <<~HEADER
 
 HEADER
 
-File.write(OUTPUT_PATH, header + YAML.dump(compose))
+yaml = YAML.dump(compose)
+# Some Compose parsers (including certain platform ingestors) are picky about the
+# explicit document start marker. Remove it for maximum compatibility.
+yaml = yaml.sub(/\A---\s*\n/, "")
+
+File.write(OUTPUT_PATH, header + yaml)
 
 puts("Wrote #{OUTPUT_PATH}")

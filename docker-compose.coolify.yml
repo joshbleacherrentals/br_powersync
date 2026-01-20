@@ -24,7 +24,6 @@
 #   ps-dev/ps-staging/ps-prod subdomains to the internal container port.
 # -----------------------------------------------------------------------------
 
----
 services:
   mongo:
     image: mongo:7.0
