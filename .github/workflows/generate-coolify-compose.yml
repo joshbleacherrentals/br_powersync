@@ -1,0 +1,52 @@
+name: Generate docker-compose.coolify.yml
+
+on:
+  push:
+    branches:
+      - "**"
+    paths-ignore:
+      - docker-compose.coolify.yml
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate docker-compose.coolify.yml
+        run: ./scripts/generate-coolify-compose.sh
+
+      - name: Commit generated file (push only)
+        if: github.event_name == 'push'
+        run: |
+          if git diff --quiet -- docker-compose.coolify.yml; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docker-compose.coolify.yml
+          git commit -m "chore: generate docker-compose.coolify.yml" || exit 0
+          git push
+
+      - name: Verify generated file is up to date (PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if git diff --quiet -- docker-compose.coolify.yml; then
+            echo "docker-compose.coolify.yml is up to date."
+            exit 0
+          fi
+
+          echo "docker-compose.coolify.yml is out of date."
+          echo "Run ./scripts/generate-coolify-compose.sh and commit the result."
+          git diff -- docker-compose.coolify.yml
+          exit 1
