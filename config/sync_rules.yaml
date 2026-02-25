@@ -24,6 +24,7 @@ bucket_definitions:
       - SELECT * FROM "TaskStatuses" WHERE bucket.app = 'web'
       - SELECT * FROM "TaskTypes" WHERE bucket.app = 'web'
       - SELECT * FROM "Tasks" WHERE bucket.app = 'web'
+      - SELECT * FROM "ScorecardTargets" WHERE bucket.app = 'web'
       - SELECT * FROM "UserHomeBases" WHERE bucket.app = 'web'
       - SELECT * FROM "UserRoles" WHERE bucket.app = 'web'
       - SELECT * FROM "UserStatuses" WHERE bucket.app = 'web'
