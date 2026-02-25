@@ -31,6 +31,7 @@ bucket_definitions:
       - SELECT * FROM "Users" WHERE bucket.app = 'web'
       - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'web'
       - SELECT * FROM "DashboardFilterSettings" WHERE bucket.app = 'web'
+      - SELECT * FROM "BlueBook" WHERE bucket.app = 'web'
 
   # Mobile sync is driver-scoped to keep devices small.
   # PowerSync restricts sync-rule data queries to a small safe subset
@@ -64,3 +65,4 @@ bucket_definitions:
       - SELECT * FROM "Vehicles" WHERE bucket.app = 'mobile'
       - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'mobile'
       - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "BlueBook" WHERE bucket.app = 'mobile'
