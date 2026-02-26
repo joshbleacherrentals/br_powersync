@@ -4,6 +4,7 @@ services:
     image: mongo:7.0
     command: --replSet rs0 --bind_ip_all --quiet
     restart: unless-stopped
+    exclude_from_hc: true
     ports:
       - 27017:27017
     volumes:
@@ -15,6 +16,7 @@ services:
     depends_on:
       - mongo
     restart: on-failure
+    exclude_from_hc: true
     entrypoint:
       - bash
       - -c
