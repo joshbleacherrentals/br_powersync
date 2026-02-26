@@ -39,6 +39,7 @@ services:
     image: mongo:7.0
     command: "--replSet rs0 --bind_ip_all --quiet"
     restart: unless-stopped
+    exclude_from_hc: true
     volumes:
     - mongo_storage:/data/db
   mongo-rs-init:
@@ -46,6 +47,7 @@ services:
     depends_on:
     - mongo
     restart: on-failure
+    exclude_from_hc: true
     entrypoint:
     - bash
     - "-c"
