@@ -82,8 +82,6 @@ services:
         condition: service_completed_successfully
     networks:
     - default
-    expose:
-    - "${PS_PORT}"
 volumes:
   mongo_storage:
 networks:

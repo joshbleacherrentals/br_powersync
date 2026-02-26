@@ -167,20 +167,11 @@ end
 
 # Coolify runs multiple compose resources on the same host.
 # Publishing host ports (e.g. 8080:8080, 27017:27017) will collide across dev/staging/prod.
-# Instead, we let Coolify's proxy route to the container port internally via `expose`.
-#
-# We keep `expose` (internal-only) on the powersync service so Traefik can discover
-# the port without it being bound to the host. Without this, Traefik logs
-# "port is missing" and the route has no backend, causing 502s on every request.
+# Instead, we let Coolify's proxy route to the container port internally.
+# Traefik reads the port directly from the domain field (e.g. https://ps-prod.example.com:8080).
 ["mongo", "powersync"].each do |name|
   svc = compose.dig("services", name)
   svc&.delete("ports")
-end
-
-# Expose the PowerSync port internally so Traefik can route to it.
-if powersync_service.is_a?(Hash)
-  ps_port = "${PS_PORT}"
-  powersync_service["expose"] = [ps_port]
 end
 
 # Supabase hosted Postgres direct connection endpoints are IPv6-only.
