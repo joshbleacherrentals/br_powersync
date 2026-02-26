@@ -54,7 +54,7 @@ services:
       }]})'''
   powersync:
     restart: unless-stopped
-    image: journeyapps/powersync-service:latest
+    image: journeyapps/powersync-service:1.20.0
     command:
     - start
     - "-r"

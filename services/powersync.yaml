@@ -1,7 +1,7 @@
 services:
   powersync:
     restart: unless-stopped
-    image: journeyapps/powersync-service:latest
+    image: journeyapps/powersync-service:1.20.0
     # The unified service runs an API server and replication worker in the same container.
     # These services can be executed in different containers by using individual entry commands e.g.
     # Start only the API server with
