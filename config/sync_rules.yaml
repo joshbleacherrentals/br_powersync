@@ -32,6 +32,10 @@ bucket_definitions:
       - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'web'
       - SELECT * FROM "DashboardFilterSettings" WHERE bucket.app = 'web'
       - SELECT * FROM "BlueBook" WHERE bucket.app = 'web'
+      - SELECT * FROM "Vendors" WHERE bucket.app = 'web'
+      - SELECT * FROM "WorkTrackerGroups" WHERE bucket.app = 'web'
+      - SELECT * FROM "Zones" WHERE bucket.app = 'web'
+      - SELECT * FROM "ZoneStateProvinces" WHERE bucket.app = 'web'
 
   # Mobile sync is driver-scoped to keep devices small.
   # PowerSync restricts sync-rule data queries to a small safe subset
