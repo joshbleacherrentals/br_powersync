@@ -37,6 +37,12 @@ bucket_definitions:
       - SELECT * FROM "WorkTrackerGroups" WHERE bucket.app = 'web'
       - SELECT * FROM "Zones" WHERE bucket.app = 'web'
       - SELECT * FROM "ZoneStateProvinces" WHERE bucket.app = 'web'
+      - SELECT * FROM "InspectionQuestions" WHERE bucket.app = 'web'
+      - SELECT * FROM "DriverScorecardStatsPerDriver" WHERE bucket.app = 'web'
+      - SELECT * FROM "DriverScoreCardStats" WHERE bucket.app = 'web'
+      - SELECT * FROM "MaintenanceEvents" WHERE bucket.app = 'web'
+      - SELECT * FROM "BleacherMaintEvents" WHERE bucket.app = 'web'
+      - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'web'
 
   # Mobile sync is driver-scoped to keep devices small.
   # PowerSync restricts sync-rule data queries to a small safe subset
@@ -72,3 +78,7 @@ bucket_definitions:
       - SELECT * FROM "Vehicles" WHERE bucket.app = 'mobile'
       - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'mobile'
       - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "InspectionQuestions" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "InspectionPhotos" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "DamageReports" WHERE bucket.app = 'mobile'
+      - SELECT * FROM "DamageReportPhotos" WHERE bucket.app = 'mobile'
