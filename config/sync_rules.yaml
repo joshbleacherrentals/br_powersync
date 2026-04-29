@@ -43,6 +43,18 @@ bucket_definitions:
       - SELECT * FROM "MaintenanceEvents" WHERE bucket.app = 'web'
       - SELECT * FROM "BleacherMaintEvents" WHERE bucket.app = 'web'
       - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapQuarters" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapSprints" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapFeatures" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapFeatureSprintLabels" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapTasks" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapBacklogTickets" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapAttachments" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapTaskSubscriptions" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapTaskMessages" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapTaskMessageReadReceipts" WHERE bucket.app = 'web'
+      - SELECT * FROM "RoadmapTaskTypingIndicators" WHERE bucket.app = 'web'
+      - SELECT * FROM "Developers" WHERE bucket.app = 'web'
 
   # Mobile sync is driver-scoped to keep devices small.
   # PowerSync restricts sync-rule data queries to a small safe subset
