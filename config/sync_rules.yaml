@@ -55,6 +55,8 @@ bucket_definitions:
       - SELECT * FROM "RoadmapTaskMessageReadReceipts" WHERE bucket.app = 'web'
       - SELECT * FROM "RoadmapTaskTypingIndicators" WHERE bucket.app = 'web'
       - SELECT * FROM "Developers" WHERE bucket.app = 'web'
+      - SELECT * FROM "Alerts" WHERE bucket.app = 'web'
+      - SELECT * FROM "UserAlerts" WHERE bucket.app = 'web'
 
   # Mobile sync is driver-scoped to keep devices small.
   # PowerSync restricts sync-rule data queries to a small safe subset
