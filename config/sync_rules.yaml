@@ -1,98 +1,97 @@
-# yaml-language-server: $schema=https://unpkg.com/@powersync/service-sync-rules@latest/schema/sync_rules.json
-#
 # See Documentation for more information:
-# https://docs.powersync.com/usage/sync-rules
+# https://docs.powersync.com/sync/streams/overview
 #
 # Note that changes to this file are not watched.
 # The service needs to be restarted for changes to take effect.
 
-bucket_definitions:
+config:
+  edition: 3
+
+streams:
+  # Web stream: auto-subscribes on connect, gated by connection parameter.
+  # Web clients connect with params: { app: "web" }.
   web:
-    parameters: |
-      select 'web' as app
-      where (request.parameters() ->> 'app') = 'web'
-    data:
-      - SELECT * FROM "AccountManagers" WHERE bucket.app = 'web'
-      - SELECT * FROM "Addresses" WHERE bucket.app = 'web'
-      - SELECT * FROM "BleacherEvents" WHERE bucket.app = 'web'
-      - SELECT * FROM "BleacherUsers" WHERE bucket.app = 'web'
-      - SELECT * FROM "Bleachers" WHERE bucket.app = 'web'
-      - SELECT * FROM "Blocks" WHERE bucket.app = 'web'
-      - SELECT * FROM "DriverUnavailability" WHERE bucket.app = 'web'
-      - SELECT * FROM "Drivers" WHERE bucket.app = 'web'
-      - SELECT * FROM "Events" WHERE bucket.app = 'web'
-      - SELECT * FROM "HomeBases" WHERE bucket.app = 'web'
-      - SELECT * FROM "TaskStatuses" WHERE bucket.app = 'web'
-      - SELECT * FROM "TaskTypes" WHERE bucket.app = 'web'
-      - SELECT * FROM "Tasks" WHERE bucket.app = 'web'
-      - SELECT * FROM "ScorecardTargets" WHERE bucket.app = 'web'
-      - SELECT * FROM "UserHomeBases" WHERE bucket.app = 'web'
-      - SELECT * FROM "UserRoles" WHERE bucket.app = 'web'
-      - SELECT * FROM "UserStatuses" WHERE bucket.app = 'web'
-      - SELECT * FROM "Users" WHERE bucket.app = 'web'
-      - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'web'
-      - SELECT * FROM "DashboardFilterSettings" WHERE bucket.app = 'web'
-      - SELECT * FROM "BlueBook" WHERE bucket.app = 'web'
-      - SELECT * FROM "Vendors" WHERE bucket.app = 'web'
-      - SELECT * FROM "WorkTrackerGroups" WHERE bucket.app = 'web'
-      - SELECT * FROM "Zones" WHERE bucket.app = 'web'
-      - SELECT * FROM "ZoneStateProvinces" WHERE bucket.app = 'web'
-      - SELECT * FROM "InspectionQuestions" WHERE bucket.app = 'web'
-      - SELECT * FROM "DriverScorecardStatsPerDriver" WHERE bucket.app = 'web'
-      - SELECT * FROM "DriverScoreCardStats" WHERE bucket.app = 'web'
-      - SELECT * FROM "MaintenanceEvents" WHERE bucket.app = 'web'
-      - SELECT * FROM "BleacherMaintEvents" WHERE bucket.app = 'web'
-      - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapQuarters" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapSprints" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapFeatures" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapFeatureSprintLabels" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapTasks" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapBacklogTickets" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapAttachments" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapTaskSubscriptions" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapTaskMessages" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapTaskMessageReadReceipts" WHERE bucket.app = 'web'
-      - SELECT * FROM "RoadmapTaskTypingIndicators" WHERE bucket.app = 'web'
-      - SELECT * FROM "Developers" WHERE bucket.app = 'web'
-      - SELECT * FROM "Alerts" WHERE bucket.app = 'web'
-      - SELECT * FROM "UserAlerts" WHERE bucket.app = 'web'
+    auto_subscribe: true
+    accept_potentially_dangerous_queries: true
+    queries:
+      - SELECT * FROM "AccountManagers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Addresses" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Alerts" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "BleacherEvents" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "BleacherMaintEvents" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "BleacherUsers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Bleachers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Blocks" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "BlueBook" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "DashboardFilterSettings" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Developers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "DriverScoreCardStats" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "DriverScorecardStatsPerDriver" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "DriverUnavailability" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Drivers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Events" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "HomeBases" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "InspectionQuestions" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "MaintenanceEvents" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapAttachments" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapBacklogTickets" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapFeatureSprintLabels" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapFeatures" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapQuarters" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapSprints" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapTaskMessageReadReceipts" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapTaskMessages" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapTaskSubscriptions" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapTaskTypingIndicators" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "RoadmapTasks" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "ScorecardTargets" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "TaskStatuses" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "TaskTypes" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Tasks" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "UserAlerts" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "UserHomeBases" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "UserRoles" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "UserStatuses" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Users" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Vendors" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "WorkTrackerGroups" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "WorkTrackerInspections" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "WorkTrackers" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "ZoneStateProvinces" WHERE connection.parameter('app') = 'web'
+      - SELECT * FROM "Zones" WHERE connection.parameter('app') = 'web'
 
-  # Mobile sync is driver-scoped to keep devices small.
-  # PowerSync restricts sync-rule data queries to a small safe subset
-  # (single-table SELECTs, no joins/unions/subqueries).
+  # Mobile stream: auto-subscribes on connect, gated by connection parameter.
+  # Mobile clients connect with params: { app: "mobile" }.
+  # Driver-scoped subset to keep devices small.
   #
-  # We satisfy this by querying through Postgres views that pre-join/shape the data.
-  # These views are created in Supabase migrations (see br_next/bleacher_rentals/supabase/migrations).
+  # Some of these tables are Postgres views that pre-join/shape data,
+  # created in Supabase migrations (see br_next/bleacher_rentals/supabase/migrations).
   mobile:
-    parameters: |
-      select 'mobile' as app
-      where (request.parameters() ->> 'app') = 'mobile'
-
-    data:
-      - SELECT * FROM "AccountManagers" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Addresses" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "BleacherEvents" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "BleacherUsers" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Bleachers" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Blocks" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "BlueBook" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "DriverUnavailability" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Drivers" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Events" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "HomeBases" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "InspectionPhotos" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "TaskStatuses" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "TaskTypes" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Tasks" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "UserHomeBases" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "UserRoles" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "UserStatuses" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Users" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "Vehicles" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "WorkTrackers" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "WorkTrackerInspections" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "InspectionQuestions" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "InspectionPhotos" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "DamageReports" WHERE bucket.app = 'mobile'
-      - SELECT * FROM "DamageReportPhotos" WHERE bucket.app = 'mobile'
+    auto_subscribe: true
+    accept_potentially_dangerous_queries: true
+    queries:
+      - SELECT * FROM "AccountManagers" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Addresses" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "BleacherEvents" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "BleacherUsers" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Bleachers" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Blocks" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "BlueBook" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "DamageReportPhotos" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "DamageReports" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "DriverUnavailability" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Drivers" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Events" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "HomeBases" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "InspectionPhotos" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "InspectionQuestions" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "TaskStatuses" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "TaskTypes" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Tasks" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "UserHomeBases" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "UserRoles" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "UserStatuses" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Users" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "Vehicles" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "WorkTrackerInspections" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "WorkTrackers" WHERE connection.parameter('app') = 'mobile'
