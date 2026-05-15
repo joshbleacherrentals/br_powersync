@@ -8,57 +8,120 @@ config:
   edition: 3
 
 streams:
-  # Web stream: auto-subscribes on connect, gated by connection parameter.
+  # Web stream: Zero Trust — nothing syncs unless a role check passes.
   # Web clients connect with params: { app: "web" }.
   web:
     auto_subscribe: true
     accept_potentially_dangerous_queries: true
     queries:
+      # Identity tables: needed by useUserAccess to determine role.
+      - SELECT * FROM "Users" WHERE connection.parameter('app') = 'web' AND clerk_user_id = auth.user_id()
       - SELECT * FROM "AccountManagers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Addresses" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Alerts" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "BleacherEvents" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "BleacherMaintEvents" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "BleacherUsers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Bleachers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Blocks" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "BlueBook" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "DashboardFilterSettings" WHERE connection.parameter('app') = 'web'
       - SELECT * FROM "Developers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "DriverScoreCardStats" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "DriverScorecardStatsPerDriver" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "DriverUnavailability" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Drivers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Events" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "HomeBases" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "InspectionQuestions" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "MaintenanceEvents" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapAttachments" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapBacklogTickets" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapFeatureSprintLabels" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapFeatures" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapQuarters" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapSprints" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapTaskMessageReadReceipts" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapTaskMessages" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapTaskSubscriptions" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapTaskTypingIndicators" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "RoadmapTasks" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "ScorecardTargets" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "TaskStatuses" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "TaskTypes" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Tasks" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "UserAlerts" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "UserHomeBases" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "UserRoles" WHERE connection.parameter('app') = 'web'
       - SELECT * FROM "UserStatuses" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Users" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Vendors" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "WorkTrackerGroups" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "WorkTrackerInspections" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "WorkTrackers" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "ZoneStateProvinces" WHERE connection.parameter('app') = 'web'
-      - SELECT * FROM "Zones" WHERE connection.parameter('app') = 'web'
+
+      # Dashboard filter settings: each user sees only their own row
+      - SELECT "DashboardFilterSettings".* FROM "DashboardFilterSettings" JOIN "Users" ON "DashboardFilterSettings"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+      # Alert tables: user sees only their own alerts via UserAlerts.user_uuid
+      - SELECT "Alerts".* FROM "Alerts" JOIN "UserAlerts" ON "UserAlerts"."alert_uuid" = "Alerts"."id" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+      # Developer tables: developer role
+      - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapSprints".* FROM "RoadmapSprints" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatures".* FROM "RoadmapFeatures" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatureSprintLabels".* FROM "RoadmapFeatureSprintLabels" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapBacklogTickets".* FROM "RoadmapBacklogTickets" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskSubscriptions".* FROM "RoadmapTaskSubscriptions" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+      # Manager tables: account manager role
+      # Roadmap tables
+      - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapSprints".* FROM "RoadmapSprints" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatures".* FROM "RoadmapFeatures" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatureSprintLabels".* FROM "RoadmapFeatureSprintLabels" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapBacklogTickets".* FROM "RoadmapBacklogTickets" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskSubscriptions".* FROM "RoadmapTaskSubscriptions" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      # Operational tables
+      - SELECT "Addresses".* FROM "Addresses" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherMaintEvents".* FROM "BleacherMaintEvents" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherUsers".* FROM "BleacherUsers" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Bleachers".* FROM "Bleachers" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Blocks".* FROM "Blocks" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BlueBook".* FROM "BlueBook" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DamageReports".* FROM "DamageReports" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Drivers".* FROM "Drivers" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScoreCardStats".* FROM "DriverScoreCardStats" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScorecardStatsPerDriver".* FROM "DriverScorecardStatsPerDriver" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Events".* FROM "Events" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "HomeBases".* FROM "HomeBases" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "InspectionQuestions".* FROM "InspectionQuestions" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "MaintenanceEvents".* FROM "MaintenanceEvents" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "ScorecardTargets".* FROM "ScorecardTargets" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Tasks".* FROM "Tasks" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Vendors".* FROM "Vendors" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerGroups".* FROM "WorkTrackerGroups" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+      # Admin tables: admin sees ALL rows in ALL tables.
+      # Users: admin sees all users (non-admin sees only self via identity rule above)
+      - SELECT "Users".* FROM "Users" JOIN "Users" AS "admin" ON "admin"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "admin"."clerk_user_id" = auth.user_id()
+      # Developer tables
+      - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapSprints".* FROM "RoadmapSprints" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatures".* FROM "RoadmapFeatures" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapFeatureSprintLabels".* FROM "RoadmapFeatureSprintLabels" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapBacklogTickets".* FROM "RoadmapBacklogTickets" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskSubscriptions".* FROM "RoadmapTaskSubscriptions" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      # Manager tables
+      - SELECT "Addresses".* FROM "Addresses" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Alerts".* FROM "Alerts" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherMaintEvents".* FROM "BleacherMaintEvents" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherUsers".* FROM "BleacherUsers" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Bleachers".* FROM "Bleachers" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Blocks".* FROM "Blocks" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BlueBook".* FROM "BlueBook" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DamageReports".* FROM "DamageReports" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DashboardFilterSettings".* FROM "DashboardFilterSettings" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Drivers".* FROM "Drivers" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScoreCardStats".* FROM "DriverScoreCardStats" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScorecardStatsPerDriver".* FROM "DriverScorecardStatsPerDriver" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Events".* FROM "Events" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "HomeBases".* FROM "HomeBases" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "InspectionQuestions".* FROM "InspectionQuestions" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "MaintenanceEvents".* FROM "MaintenanceEvents" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Notifications".* FROM "Notifications" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "ScorecardTargets".* FROM "ScorecardTargets" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Tasks".* FROM "Tasks" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "UserHomeBases".* FROM "UserHomeBases" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "UserRoles".* FROM "UserRoles" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Vehicles".* FROM "Vehicles" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Vendors".* FROM "Vendors" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerGroups".* FROM "WorkTrackerGroups" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
 
   # Mobile stream: auto-subscribes on connect, gated by connection parameter.
   # Mobile clients connect with params: { app: "mobile" }.
