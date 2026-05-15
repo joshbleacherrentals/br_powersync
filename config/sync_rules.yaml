@@ -23,6 +23,25 @@ streams:
       # Dashboard filter settings: each user sees only their own row
       - SELECT "DashboardFilterSettings".* FROM "DashboardFilterSettings" JOIN "Users" ON "DashboardFilterSettings"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
 
+      # Viewer tables: is_viewer gets read-only access (write blocked by RLS)
+      - SELECT "Addresses".* FROM "Addresses" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "BleacherMaintEvents".* FROM "BleacherMaintEvents" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Bleachers".* FROM "Bleachers" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Blocks".* FROM "Blocks" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DamageReports".* FROM "DamageReports" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Drivers".* FROM "Drivers" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScoreCardStats".* FROM "DriverScoreCardStats" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverScorecardStatsPerDriver".* FROM "DriverScorecardStatsPerDriver" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Events".* FROM "Events" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "HomeBases".* FROM "HomeBases" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "MaintenanceEvents".* FROM "MaintenanceEvents" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "ScorecardTargets".* FROM "ScorecardTargets" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerGroups".* FROM "WorkTrackerGroups" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
       # Alert tables: user sees only their own alerts via UserAlerts.user_uuid
       - SELECT "Alerts".* FROM "Alerts" JOIN "UserAlerts" ON "UserAlerts"."alert_uuid" = "Alerts"."id" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
