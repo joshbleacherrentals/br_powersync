@@ -61,10 +61,9 @@ streams:
 
       # Manager tables: account manager role
       # Roadmap tables
-      - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
-      - SELECT "RoadmapSprints".* FROM "RoadmapSprints" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
-      - SELECT "RoadmapFeatures".* FROM "RoadmapFeatures" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
-      - SELECT "RoadmapFeatureSprintLabels".* FROM "RoadmapFeatureSprintLabels" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+
+
       - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "RoadmapBacklogTickets".* FROM "RoadmapBacklogTickets" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "RoadmapTaskSubscriptions".* FROM "RoadmapTaskSubscriptions" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
