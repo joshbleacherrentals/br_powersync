@@ -42,6 +42,11 @@ streams:
       - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
 
+      # Viewer: sees all Users (needed for team page, event owner names, driver display in modals)
+      - SELECT "Users".* FROM "Users" JOIN "Users" AS "viewer" ON "viewer"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "viewer"."clerk_user_id" = auth.user_id()
+      # Viewer: UserHomeBases for team page details
+      - SELECT "UserHomeBases".* FROM "UserHomeBases" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
       # Alert tables: user sees only their own alerts via UserAlerts.user_uuid
       - SELECT "Alerts".* FROM "Alerts" JOIN "UserAlerts" ON "UserAlerts"."alert_uuid" = "Alerts"."id" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
@@ -94,6 +99,9 @@ streams:
       - SELECT "WorkTrackerGroups".* FROM "WorkTrackerGroups" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id()
+
+      # Account manager: sees all Users (needed for /team page, profile viewing)
+      - SELECT "Users".* FROM "Users" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" AS "am_user" ON "AccountManagers"."user_uuid" = "am_user"."id" WHERE connection.parameter('app') = 'web' AND "am_user"."clerk_user_id" = auth.user_id()
 
       # Admin tables: admin sees ALL rows in ALL tables.
       # Users: admin sees all users (non-admin sees only self via identity rule above)
