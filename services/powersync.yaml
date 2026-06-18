@@ -1,7 +1,7 @@
 services:
   powersync:
     restart: unless-stopped
-    image: journeyapps/powersync-service:latest
+    image: journeyapps/powersync-service:1.20.5
     # The unified service runs an API server and replication worker in the same container.
     # These services can be executed in different containers by using individual entry commands e.g.
     # Start only the API server with
@@ -73,7 +73,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://localhost:' + (process.env.PS_PORT || 8080) + '/probes/liveness').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))\"",
+          'node -e "fetch(''http://localhost:'' + (process.env.PS_PORT || 8080) + ''/probes/liveness'').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"',
         ]
       interval: 10s
       timeout: 5s
