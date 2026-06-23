@@ -78,6 +78,7 @@ streams:
       - SELECT "ContractSignatures".* FROM "ContractSignatures" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "PaymentHistory".* FROM "PaymentHistory" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Viewer: sees all Users (needed for team page, event owner names, driver display in modals)
       - SELECT "Users".* FROM "Users" JOIN "Users" AS "viewer" ON "viewer"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "viewer"."clerk_user_id" = auth.user_id() AND "viewer"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -158,6 +159,7 @@ streams:
       - SELECT "ContractSignatures".* FROM "ContractSignatures" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "PaymentHistory".* FROM "PaymentHistory" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Account manager: sees all Users (needed for /team page, profile viewing)
       - SELECT "Users".* FROM "Users" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" AS "am_user" ON "AccountManagers"."user_uuid" = "am_user"."id" WHERE connection.parameter('app') = 'web' AND "am_user"."clerk_user_id" = auth.user_id() AND "am_user"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -232,6 +234,7 @@ streams:
       - SELECT "ContractSignatures".* FROM "ContractSignatures" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "PaymentHistory".* FROM "PaymentHistory" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
   # Mobile stream: auto-subscribes on connect, gated by connection parameter.
   # Mobile clients connect with params: { app: "mobile" }.
