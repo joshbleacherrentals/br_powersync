@@ -87,8 +87,8 @@ streams:
       - SELECT "UserHomeBases".* FROM "UserHomeBases" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Alert tables: user sees only their own alerts via UserAlerts.user_uuid
-      - SELECT "Alerts".* FROM "Alerts" JOIN "UserAlerts" ON "UserAlerts"."alert_uuid" = "Alerts"."id" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
-      - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # - SELECT "Alerts".* FROM "Alerts" JOIN "UserAlerts" ON "UserAlerts"."alert_uuid" = "Alerts"."id" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # - SELECT "UserAlerts".* FROM "UserAlerts" JOIN "Users" ON "UserAlerts"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Developer tables: developer role
       - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
