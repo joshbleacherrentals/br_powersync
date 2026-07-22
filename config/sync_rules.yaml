@@ -256,6 +256,7 @@ streams:
     queries:
       - SELECT * FROM "AccountManagers" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "Addresses" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "AppVersionPolicy" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "BleacherEvents" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "BleacherUsers" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "Bleachers" WHERE connection.parameter('app') = 'mobile'
