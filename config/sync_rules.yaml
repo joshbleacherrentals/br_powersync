@@ -24,6 +24,8 @@ streams:
       - SELECT "Developers".* FROM "Developers" JOIN "Users" ON "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5' WHERE connection.parameter('app') = 'web'
       # UserStatuses: reference data, always synced (needed to interpret status_uuid)
       - SELECT * FROM "UserStatuses" WHERE connection.parameter('app') = 'web'
+      # AppVersionPolicy: reference data, synced for all users
+      - SELECT * FROM "AppVersionPolicy" WHERE connection.parameter('app') = 'web'
 
       # Dashboard filter settings: each user sees only their own row
       - SELECT "DashboardFilterSettings".* FROM "DashboardFilterSettings" JOIN "Users" ON "DashboardFilterSettings"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -264,6 +266,7 @@ streams:
     queries:
       - SELECT * FROM "AccountManagers" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "Addresses" WHERE connection.parameter('app') = 'mobile'
+      - SELECT * FROM "AppVersionPolicy" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "BleacherEvents" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "BleacherUsers" WHERE connection.parameter('app') = 'mobile'
       - SELECT * FROM "Bleachers" WHERE connection.parameter('app') = 'mobile'
