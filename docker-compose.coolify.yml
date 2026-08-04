@@ -29,10 +29,12 @@
 #   We do not hardcode an IPv6 subnet; Docker auto-allocates one per network.
 #
 # Config delivery:
-#   PowerSync config is mounted from the repo as individual files (see the
-#   powersync `volumes:` block) using Coolify's `is_directory: false` annotation.
-#   The Coolify resource must have "Preserve Repository During Deployment" enabled
-#   so ./config/*.yaml exist on the host at mount time.
+#   The repo `config/` directory is mounted at /config (see the powersync
+#   `volumes:` block). The Coolify resource must have "Preserve Repository During
+#   Deployment" enabled so ./config exists on the host at mount time.
+#   We mount the directory (not individual files) because Coolify's single-file
+#   bind mounts are created as directories (coollabsio/coolify #8107) and collide
+#   with the repo files on docker cp.
 #   (We previously base64-inlined the config into POWERSYNC_CONFIG_B64, but that
 #   bloated this file until Coolify's file-copy step hit the OS argument-length
 #   limit — "Argument list too long".)
@@ -65,13 +67,9 @@ services:
     - unified
     volumes:
     - type: bind
-      source: "./config/powersync.yaml"
-      target: "/config/powersync.yaml"
-      is_directory: false
-    - type: bind
-      source: "./config/sync_rules.yaml"
-      target: "/config/sync_rules.yaml"
-      is_directory: false
+      source: "./config"
+      target: "/config"
+      is_directory: true
     environment:
       POWERSYNC_CONFIG_PATH: "/config/powersync.yaml"
       NODE_OPTIONS: "--max-old-space-size=1000 --unhandled-rejections=none"
