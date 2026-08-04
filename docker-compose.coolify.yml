@@ -78,7 +78,6 @@ services:
       PS_JWKS_URL: "${PS_JWKS_URL}"
       PS_PORT: "${PS_PORT}"
     labels:
-    - traefik.docker.network=${PS_COOLIFY_NETWORK}
     healthcheck:
       test:
       - CMD-SHELL
