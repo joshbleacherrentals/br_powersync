@@ -79,7 +79,7 @@ services:
     # per environment (ps-dev / ps-staging / ps-prod), so it is supplied via an env var
     # set in each Coolify resource. If unset, the label resolves to empty and is ignored.
     labels:
-      - "traefik.docker.network=${PS_COOLIFY_NETWORK}"
+      # - "traefik.docker.network=${PS_COOLIFY_NETWORK}"
     # This requires image: journeyapps/powersync-service:0.5.8 or later
     healthcheck:
       test:
