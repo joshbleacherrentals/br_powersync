@@ -131,30 +131,24 @@ if powersync_env.is_a?(Hash)
   powersync_env["POWERSYNC_CONFIG_PATH"] = POWERSYNC_CONFIG_TARGET
 end
 
-# Mount the PowerSync config files from the repo as individual files.
+# Mount the whole repo `config/` directory (contains powersync.yaml + sync_rules.yaml).
 #
-# Each file uses Coolify's `is_directory: false` annotation. Without it, Coolify
-# has historically created a *directory* at the target path (coollabsio/coolify
-# #3375, #8107), which breaks single-file config mounts.
+# We deliberately mount the DIRECTORY, not individual files: Coolify's single-file
+# bind mounts are unreliable — it creates a *directory* at the file's target path
+# even with `is_directory: false` (coollabsio/coolify #3375, #8107), which then
+# collides with the repo file during `docker cp`. Directory mounts avoid that path.
 #
-# Requires "Preserve Repository During Deployment" enabled on the Coolify resource
-# so the repo files exist on the host at mount time.
+# Mirrors the local docker-compose.yml (`./config:/config`). Requires "Preserve
+# Repository During Deployment" enabled so the repo files exist on the host.
 #
-# `is_directory` is Coolify-only; plain Docker ignores it, so the local
-# docker-compose.yml (which mounts ./config wholesale) is unaffected.
+# `is_directory` is Coolify-only; plain Docker ignores it.
 if powersync_service.is_a?(Hash)
   powersync_service["volumes"] = [
     {
       "type" => "bind",
-      "source" => "./config/powersync.yaml",
-      "target" => POWERSYNC_CONFIG_TARGET,
-      "is_directory" => false,
-    },
-    {
-      "type" => "bind",
-      "source" => "./config/sync_rules.yaml",
-      "target" => "/config/sync_rules.yaml",
-      "is_directory" => false,
+      "source" => "./config",
+      "target" => "/config",
+      "is_directory" => true,
     },
   ]
 end
@@ -218,10 +212,12 @@ header = <<~HEADER
   #   We do not hardcode an IPv6 subnet; Docker auto-allocates one per network.
   #
   # Config delivery:
-  #   PowerSync config is mounted from the repo as individual files (see the
-  #   powersync `volumes:` block) using Coolify's `is_directory: false` annotation.
-  #   The Coolify resource must have "Preserve Repository During Deployment" enabled
-  #   so ./config/*.yaml exist on the host at mount time.
+  #   The repo `config/` directory is mounted at /config (see the powersync
+  #   `volumes:` block). The Coolify resource must have "Preserve Repository During
+  #   Deployment" enabled so ./config exists on the host at mount time.
+  #   We mount the directory (not individual files) because Coolify's single-file
+  #   bind mounts are created as directories (coollabsio/coolify #8107) and collide
+  #   with the repo files on docker cp.
   #   (We previously base64-inlined the config into POWERSYNC_CONFIG_B64, but that
   #   bloated this file until Coolify's file-copy step hit the OS argument-length
   #   limit — "Argument list too long".)
