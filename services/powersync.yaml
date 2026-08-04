@@ -68,18 +68,14 @@ services:
       # PS_JWK_N:
       # PS_JWK_E:
       # PS_JWK_KID:
-    # Tell Traefik (Coolify's proxy) exactly which Docker network to route through.
-    # The PowerSync container is attached to multiple networks (the Coolify-managed
-    # resource network where the proxy lives, plus the IPv6-enabled `default` network
-    # used to reach Supabase). Without this label, Traefik may pick the network the
-    # proxy is NOT on and return intermittent "Gateway Timeout" errors that only a
-    # redeploy clears.
-    #
-    # The value is the Coolify resource network name (the resource UUID), which differs
-    # per environment (ps-dev / ps-staging / ps-prod), so it is supplied via an env var
-    # set in each Coolify resource. If unset, the label resolves to empty and is ignored.
-    labels:
-      # - "traefik.docker.network=${PS_COOLIFY_NETWORK}"
+    # NOTE: intentionally NO `traefik.docker.network` label.
+    # Coolify escapes `$` -> `$$` in compose labels, so `${PS_COOLIFY_NETWORK}` (or any
+    # variable) never interpolates — it deploys literally as the network name and forces
+    # Traefik onto a nonexistent network (504 Gateway Timeout). The container is on two
+    # networks (Coolify resource net + IPv6 `default` for Supabase egress), so Traefik
+    # must be told which to route through. We do that deterministically by enabling
+    # "Connect To Predefined Network" on each Coolify resource (Advanced settings), which
+    # joins the container to the proxy's network. The IPv6 `default` net stays for egress.
     # This requires image: journeyapps/powersync-service:0.5.8 or later
     healthcheck:
       test:

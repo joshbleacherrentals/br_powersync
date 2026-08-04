@@ -77,7 +77,6 @@ services:
       PS_MONGO_URI: "${PS_MONGO_URI}"
       PS_JWKS_URL: "${PS_JWKS_URL}"
       PS_PORT: "${PS_PORT}"
-    labels:
     healthcheck:
       test:
       - CMD-SHELL
