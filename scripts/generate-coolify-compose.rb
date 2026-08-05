@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "yaml"
-require "base64"
 
 ROOT = File.expand_path("..", __dir__)
 
@@ -39,32 +38,9 @@ end
 
 root = load_yaml(SOURCE_PATH)
 
-POWERSYNC_CONFIG_FILE = File.join(ROOT, "config", "powersync.yaml")
-SYNC_RULES_FILE = File.join(ROOT, "config", "sync_rules.yaml")
-
-def indent_lines(text, spaces)
-  pad = " " * spaces
-  text.split("\n", -1).map { |line| pad + line }.join("\n")
-end
-
-def inline_sync_rules_in_config(powersync_yaml:, sync_rules_yaml:)
-  inlined = powersync_yaml.dup
-
-  replacement = "sync_rules:\n  content: |\n" + indent_lines(sync_rules_yaml.rstrip, 4) + "\n"
-
-  # Replace the simple file reference with an inline block.
-  # Expected source snippet:
-  #   sync_rules:\n  #     path: sync_rules.yaml
-  #
-  # Keep this intentionally strict so we don't mangle unrelated YAML.
-  pattern = /^sync_rules:\n\s*path:\s*[^\n]+\n/m
-
-  unless inlined.match?(pattern)
-    raise "Could not find sync_rules.path in config/powersync.yaml to inline"
-  end
-
-  inlined.sub(pattern, replacement)
-end
+# Path (inside the container) to the mounted PowerSync config file.
+# PowerSync resolves sync_rules.yaml relative to this file's directory.
+POWERSYNC_CONFIG_TARGET = "/config/powersync.yaml"
 
 # Resolve `include:` by merging included docs first, then root overrides.
 includes = root.delete("include") || []
@@ -147,22 +123,34 @@ if powersync_env.is_a?(Hash)
     powersync_env["PS_MONGO_URI"] = "${PS_MONGO_URI}"
   end
 
-  # Coolify cannot reliably bind-mount repo files into containers at runtime.
-  # Instead, embed the config as base64 and let PowerSync decode it.
-  powersync_yaml = File.read(POWERSYNC_CONFIG_FILE)
-  sync_rules_yaml = File.read(SYNC_RULES_FILE)
-  config_with_inline_rules = inline_sync_rules_in_config(
-    powersync_yaml: powersync_yaml,
-    sync_rules_yaml: sync_rules_yaml
-  )
-
-  powersync_env.delete("POWERSYNC_CONFIG_PATH")
-  powersync_env["POWERSYNC_CONFIG_B64"] = Base64.strict_encode64(config_with_inline_rules)
+  # Deliver config by mounting the repo files (see volumes below) rather than
+  # base64-inlining it. Base64-inlining bloated this compose file to ~96 KB, which
+  # tipped Coolify's file-copy step past the OS single-argument limit (E2BIG,
+  # "Argument list too long"). Mounting keeps this file small and lets sync rules grow.
+  powersync_env.delete("POWERSYNC_CONFIG_B64")
+  powersync_env["POWERSYNC_CONFIG_PATH"] = POWERSYNC_CONFIG_TARGET
 end
 
-# Remove bind mounts that reference repo paths.
+# Mount the whole repo `config/` directory (contains powersync.yaml + sync_rules.yaml).
+#
+# We deliberately mount the DIRECTORY, not individual files: Coolify's single-file
+# bind mounts are unreliable — it creates a *directory* at the file's target path
+# even with `is_directory: false` (coollabsio/coolify #3375, #8107), which then
+# collides with the repo file during `docker cp`. Directory mounts avoid that path.
+#
+# Mirrors the local docker-compose.yml (`./config:/config`). Requires "Preserve
+# Repository During Deployment" enabled so the repo files exist on the host.
+#
+# `is_directory` is Coolify-only; plain Docker ignores it.
 if powersync_service.is_a?(Hash)
-  powersync_service.delete("volumes")
+  powersync_service["volumes"] = [
+    {
+      "type" => "bind",
+      "source" => "./config",
+      "target" => "/config",
+      "is_directory" => true,
+    },
+  ]
 end
 
 # Coolify runs multiple compose resources on the same host.
@@ -224,9 +212,15 @@ header = <<~HEADER
   #   We do not hardcode an IPv6 subnet; Docker auto-allocates one per network.
   #
   # Config delivery:
-  #   Coolify cannot reliably bind-mount repo files into running containers.
-  #   This compose embeds config/powersync.yaml (with sync rules inlined) into
-  #   POWERSYNC_CONFIG_B64 so the service can boot without filesystem mounts.
+  #   The repo `config/` directory is mounted at /config (see the powersync
+  #   `volumes:` block). The Coolify resource must have "Preserve Repository During
+  #   Deployment" enabled so ./config exists on the host at mount time.
+  #   We mount the directory (not individual files) because Coolify's single-file
+  #   bind mounts are created as directories (coollabsio/coolify #8107) and collide
+  #   with the repo files on docker cp.
+  #   (We previously base64-inlined the config into POWERSYNC_CONFIG_B64, but that
+  #   bloated this file until Coolify's file-copy step hit the OS argument-length
+  #   limit — "Argument list too long".)
   # -----------------------------------------------------------------------------
 
 HEADER
