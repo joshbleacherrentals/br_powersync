@@ -282,6 +282,9 @@ streams:
       - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Drivers" ON "Drivers"."id" = "DriverUnavailability"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "Vehicles".* FROM "Vehicles" JOIN "Drivers" ON "Drivers"."vehicle_uuid" = "Vehicles"."id" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "AccountManagers".* FROM "AccountManagers" JOIN "Drivers" ON "Drivers"."account_manager_uuid" = "AccountManagers"."id" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
+      # DriverDocuments: license / insurance / medical card rows for the custom
+      # photo upload queue — the driver's own only.
+      - SELECT "DriverDocuments".* FROM "DriverDocuments" JOIN "Drivers" ON "Drivers"."id" = "DriverDocuments"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
 
       # ── Addresses: pickup + dropoff of the driver's trips, and own address ──
       - SELECT "Addresses".* FROM "Addresses" JOIN "WorkTrackers" ON "WorkTrackers"."pickup_address_uuid" = "Addresses"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
