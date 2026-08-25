@@ -304,6 +304,14 @@ streams:
       - SELECT "Addresses".* FROM "Addresses" JOIN "WorkTrackers" ON "WorkTrackers"."dropoff_address_uuid" = "Addresses"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "Addresses".* FROM "Addresses" JOIN "Drivers" ON "Drivers"."address_uuid" = "Addresses"."id" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
 
+      # ── Contacts: the on-site POC on the driver's own trips, both legs ─────
+      # Scoped through WorkTrackers, exactly like Addresses above: only the
+      # contacts this driver's own trips point at reach the device. The wider
+      # customer contact book — every client contact in the business — must
+      # never sync to a driver's phone.
+      - SELECT "Contacts".* FROM "Contacts" JOIN "WorkTrackers" ON "WorkTrackers"."pickup_poc_contact_uuid" = "Contacts"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
+      - SELECT "Contacts".* FROM "Contacts" JOIN "WorkTrackers" ON "WorkTrackers"."dropoff_poc_contact_uuid" = "Contacts"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
+
       # ── Inspections + their photos: the driver's own trip inspections ───────
       - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "WorkTrackers" ON "WorkTrackers"."pre_inspection_uuid" = "WorkTrackerInspections"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "WorkTrackerInspections".* FROM "WorkTrackerInspections" JOIN "WorkTrackers" ON "WorkTrackers"."post_inspection_uuid" = "WorkTrackerInspections"."id" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
