@@ -326,6 +326,18 @@ streams:
       - SELECT "DamageReportPhotos".* FROM "DamageReportPhotos" JOIN "DamageReports" ON "DamageReports"."id" = "DamageReportPhotos"."damage_report_uuid" WHERE connection.parameter('app') = 'mobile' AND "DamageReports"."resolved_at" IS NULL
       - SELECT "DamageReportPhotos".* FROM "DamageReportPhotos" JOIN "DamageReports" ON "DamageReports"."id" = "DamageReportPhotos"."damage_report_uuid" JOIN "Users" ON "Users"."id" = "DamageReports"."created_by_user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
 
+      # ── Backlog tickets ("Direct Line to Developers") ───────────────────────
+      # RoadmapTasks is the developers' whole board — features, sprints,
+      # assignees. Only the backlog tickets THIS driver filed may reach a phone.
+      #
+      # Soft-deleted rows are deliberately NOT filtered out here. The app's
+      # daily create limit (3 per rolling 24h) counts tickets created, withdrawn
+      # ones included, and has to match the Postgres trigger exactly — a client
+      # that counted looser would let through a write the server rejects, and
+      # PowerSync drops a rejected write silently. The list screen filters
+      # `deleted_at IS NULL` itself.
+      - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "Users" ON "Users"."id" = "RoadmapTasks"."created_by_user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id() AND "RoadmapTasks"."is_backlog" = true
+
       # ── Removed (synced to every device but never read by the app): ─────────
       #   BleacherEvents, BleacherUsers, Blocks, Events, HomeBases, Tasks,
       #   TaskStatuses, TaskTypes, UserHomeBases, UserRoles
