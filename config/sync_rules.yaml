@@ -64,6 +64,12 @@ streams:
       - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Driver Satisfaction Score — definitions, submissions and answers.
+      # Not anonymous by product decision: the page names who answered, so a
+      # low score can actually be followed up.
+      - SELECT "DriverSurveys".* FROM "DriverSurveys" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyQuestions".* FROM "DriverSurveyQuestions" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyResponses".* FROM "DriverSurveyResponses" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Viewer: new send-quotes tables
       - SELECT "BleacherTypes".* FROM "BleacherTypes" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -110,6 +116,12 @@ streams:
       - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Driver Satisfaction Score — definitions, submissions and answers.
+      # Not anonymous by product decision: the page names who answered, so a
+      # low score can actually be followed up.
+      - SELECT "DriverSurveys".* FROM "DriverSurveys" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyQuestions".* FROM "DriverSurveyQuestions" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyResponses".* FROM "DriverSurveyResponses" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "ChangeLog".* FROM "ChangeLog" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Manager tables: account manager role
@@ -121,6 +133,12 @@ streams:
       - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Driver Satisfaction Score — definitions, submissions and answers.
+      # Not anonymous by product decision: the page names who answered, so a
+      # low score can actually be followed up.
+      - SELECT "DriverSurveys".* FROM "DriverSurveys" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyQuestions".* FROM "DriverSurveyQuestions" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyResponses".* FROM "DriverSurveyResponses" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       # Zones
       - SELECT "Zones".* FROM "Zones" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "AccountManagerZones".* FROM "AccountManagerZones" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -199,6 +217,12 @@ streams:
       - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Driver Satisfaction Score — definitions, submissions and answers.
+      # Not anonymous by product decision: the page names who answered, so a
+      # low score can actually be followed up.
+      - SELECT "DriverSurveys".* FROM "DriverSurveys" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyQuestions".* FROM "DriverSurveyQuestions" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverSurveyResponses".* FROM "DriverSurveyResponses" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       # Manager tables
       - SELECT "Addresses".* FROM "Addresses" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Alerts".* FROM "Alerts" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -354,6 +378,22 @@ streams:
       # actually accepted, rather than holding writes that quietly vanish at the
       # next checkpoint.
       - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "RoadmapTasks" ON "RoadmapTasks"."id" = "RoadmapTaskMessages"."task_id" JOIN "Users" ON "Users"."id" = "RoadmapTaskMessages"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id() AND "RoadmapTasks"."is_backlog" = true AND "RoadmapTaskMessages"."is_system" = true
+
+      # ── Driver Satisfaction Score ──────────────────────────────────────────
+      # The survey the driver cannot dismiss. Definitions are reference data —
+      # small, and needed in full so the question can be asked with the phone
+      # offline. Only ACTIVE ones sync: a retired survey must stop prompting.
+      - SELECT * FROM "DriverSurveys" WHERE connection.parameter('app') = 'mobile' AND "is_active" = true
+      - SELECT "DriverSurveyQuestions".* FROM "DriverSurveyQuestions" JOIN "DriverSurveys" ON "DriverSurveys"."id" = "DriverSurveyQuestions"."survey_uuid" WHERE connection.parameter('app') = 'mobile' AND "DriverSurveys"."is_active" = true AND "DriverSurveyQuestions"."is_active" = true
+      #
+      # The driver's own answers, for ALL time and never filtered by date. One
+      # row per question answered — there is no submission parent table, so
+      # this single query is the whole of a driver's survey history, and it is
+      # the app's entire memory of when it last asked: the gate compares
+      # `max(submitted_at)` against the survey's `interval_days`. Narrow this
+      # window and a driver whose last answer fell outside it is asked again the
+      # next morning, forever.
+      - SELECT "DriverSurveyResponses".* FROM "DriverSurveyResponses" JOIN "Drivers" ON "Drivers"."id" = "DriverSurveyResponses"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
 
       # ── Removed (synced to every device but never read by the app): ─────────
       #   BleacherEvents, BleacherUsers, Blocks, Events, HomeBases, Tasks,
