@@ -337,6 +337,23 @@ streams:
       # PowerSync drops a rejected write silently. The list screen filters
       # `deleted_at IS NULL` itself.
       - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "Users" ON "Users"."id" = "RoadmapTasks"."created_by_user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id() AND "RoadmapTasks"."is_backlog" = true
+      #
+      # The authorship notices the app posts alongside each ticket (created,
+      # edited, withdrawn — see features/backlog-tickets/utils/ticketNoticeInsert.ts
+      # in br_driver). Two filters, both load-bearing:
+      #
+      #   `user_uuid` = this driver, so only the driver's OWN notices come back.
+      #   `is_system` = true for the same reason from the other side. The rest of
+      #   the thread is the developers' conversation about the ticket, and
+      #   drivers are deliberately never shown ticket status — a reply landing on
+      #   a phone that has no UI for it is at best invisible and at worst a
+      #   promise the product does not make.
+      #
+      # The device never reads this table; the app writes it and moves on. The
+      # rows come back only so a phone's local database matches what Postgres
+      # actually accepted, rather than holding writes that quietly vanish at the
+      # next checkpoint.
+      - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "RoadmapTasks" ON "RoadmapTasks"."id" = "RoadmapTaskMessages"."task_id" JOIN "Users" ON "Users"."id" = "RoadmapTaskMessages"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id() AND "RoadmapTasks"."is_backlog" = true AND "RoadmapTaskMessages"."is_system" = true
 
       # ── Removed (synced to every device but never read by the app): ─────────
       #   BleacherEvents, BleacherUsers, Blocks, Events, HomeBases, Tasks,
