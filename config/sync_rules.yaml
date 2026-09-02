@@ -347,7 +347,26 @@ streams:
       - SELECT * FROM "DamageReports" WHERE connection.parameter('app') = 'mobile' AND "resolved_at" IS NULL
       - SELECT "DamageReports".* FROM "DamageReports" JOIN "Users" ON "Users"."id" = "DamageReports"."created_by_user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       # Damage photos follow the same two sets.
-      - SELECT "DamageReportPhotos".* FROM "DamageReportPhotos" JOIN "DamageReports" ON "DamageReports"."id" = "DamageReportPhotos"."damage_report_uuid" WHERE connection.parameter('app') = 'mobile' AND "DamageReports"."resolved_at" IS NULL
+      #
+      # No join, deliberately. Reaching the parent for `resolved_at` compiled
+      # into a parameter query returning one row per open report, capped at
+      # 1000: at 1018 open reports every driver's first sync failed with
+      # PSYNC_S2305 and the app sat on PoorConnectionScreen. The count is
+      # company-wide and only grows, so there was no version of that query that
+      # stayed under the cap.
+      #
+      # `report_resolved_at` mirrors the parent onto the photo row, maintained
+      # by triggers (supabase/migrations/20260902120000_damage_report_photos_report_resolved_at.sql),
+      # so this reads like the DamageReports rule above it and has no ceiling.
+      #
+      # `damage_report_uuid IS NOT NULL` preserves what the join did on its own:
+      # the column is nullable, and a parented-nowhere photo used to match no
+      # report and reach no device. Without this it would mirror NULL — "open" —
+      # and sync to every phone.
+
+      # Old one:
+      # - SELECT "DamageReportPhotos".* FROM "DamageReportPhotos" JOIN "DamageReports" ON "DamageReports"."id" = "DamageReportPhotos"."damage_report_uuid" WHERE connection.parameter('app') = 'mobile' AND "DamageReports"."resolved_at" IS NULL
+      - SELECT * FROM "DamageReportPhotos" WHERE connection.parameter('app') = 'mobile' AND "report_resolved_at" IS NULL AND "damage_report_uuid" IS NOT NULL
       - SELECT "DamageReportPhotos".* FROM "DamageReportPhotos" JOIN "DamageReports" ON "DamageReports"."id" = "DamageReportPhotos"."damage_report_uuid" JOIN "Users" ON "Users"."id" = "DamageReports"."created_by_user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
 
       # ── Backlog tickets ("Direct Line to Developers") ───────────────────────
