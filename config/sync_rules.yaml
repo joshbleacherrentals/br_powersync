@@ -326,6 +326,22 @@ streams:
 
       - SELECT * FROM "WorkTrackerTypes" WHERE connection.parameter('app') = 'mobile'
 
+      # ── Assets: the fleet reference data behind the read-only Assets page ──
+      # Bleachers already syncs whole (above). These three name what its
+      # `*_uuid` columns point at, and BleacherAnnualInspections is the one
+      # compliance fact a driver hitching a trailer needs to be able to check.
+      #
+      # Columns are listed rather than `*`, unlike the web stream. These are
+      # office-maintained tables that carry more than a driver needs —
+      # StorageLocations alone holds gate codes, site phone numbers and
+      # internal notes — and a phone that never receives a field cannot leak
+      # it. Every table here is reference data: tens to hundreds of rows, no
+      # photos, no growth with trip volume.
+      - SELECT id, name, row_count FROM "BleacherTypes" WHERE connection.parameter('app') = 'mobile' AND "deleted" = false
+      - SELECT id, name FROM "StorageLocations" WHERE connection.parameter('app') = 'mobile' AND "deleted" = false
+      - SELECT id, display_name FROM "Zones" WHERE connection.parameter('app') = 'mobile'
+      - SELECT id, bleacher_uuid, inspected_on, next_due_on, document_path FROM "BleacherAnnualInspections" WHERE connection.parameter('app') = 'mobile'
+
       # ── Scoped to the signed-in driver (Users → Drivers identity chain) ─────
       - SELECT "Drivers".* FROM "Drivers" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
       - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Drivers" ON "Drivers"."id" = "WorkTrackers"."driver_uuid" JOIN "Users" ON "Users"."id" = "Drivers"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id()
