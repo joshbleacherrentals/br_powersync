@@ -524,7 +524,7 @@ streams:
       # computed server-side, so this is what buildEventRoster now matches
       # other drivers' trackers on directly — no JOIN added, still one static
       # bucket, since these are plain columns on the same aliased table.
-      - SELECT "FleetTrackers"."id", "FleetTrackers"."bleacher_uuid", "FleetTrackers"."date", "FleetTrackers"."status", "FleetTrackers"."status_changed_at", "FleetTrackers"."work_tracker_type_uuid", "FleetTrackers"."dropoff_event_uuid", "FleetTrackers"."pickup_event_uuid" FROM "WorkTrackers" AS "FleetTrackers" WHERE connection.parameter('app') = 'mobile' AND connection.parameter('sync_version') = 2 AND "FleetTrackers"."status" != 'draft'
+      - SELECT "FleetTrackers"."id", "FleetTrackers"."bleacher_uuid", "FleetTrackers"."date", "FleetTrackers"."status", "FleetTrackers"."status_changed_at", "FleetTrackers"."work_tracker_type_uuid", "FleetTrackers"."dropoff_event_uuid", "FleetTrackers"."pickup_event_uuid", "FleetTrackers"."drive_minutes" FROM "WorkTrackers" AS "FleetTrackers" WHERE connection.parameter('app') = 'mobile' AND connection.parameter('sync_version') = 2 AND "FleetTrackers"."status" != 'draft'
 
       # ── Driver Satisfaction Score ──────────────────────────────────────────
       # The survey the driver cannot dismiss. Definitions are reference data —
