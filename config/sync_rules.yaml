@@ -487,6 +487,45 @@ streams:
       # next checkpoint.
       - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "RoadmapTasks" ON "RoadmapTasks"."id" = "RoadmapTaskMessages"."task_id" JOIN "Users" ON "Users"."id" = "RoadmapTaskMessages"."user_uuid" WHERE connection.parameter('app') = 'mobile' AND "Users"."clerk_user_id" = auth.user_id() AND "RoadmapTasks"."is_backlog" = true AND "RoadmapTaskMessages"."is_system" = true
 
+      # ── Event roster: "when are the other bleachers coming?" ───────────────
+      # Spec: br_driver/docs/specs/event-bleacher-roster.md
+      #
+      # An event can have several bleachers and several drivers. On site the
+      # organiser asks a driver about the others, and until now the driver had
+      # nothing but their own tracker. These three rules are what the
+      # PICKUP / DROP-OFF sheet reads.
+      #
+      # All three are GLOBAL — no JOIN, one bucket each. Keying them per event
+      # or per bleacher would open a bucket per row and walk straight back into
+      # PSYNC_S2305 (sync-bucket-limit.md). The volumes are small: ~660 booked
+      # events, ~3.8k BleacherEvents, ~1.6k trackers, all tiny rows.
+      #
+      # Columns are listed rather than `*`. Events carries contract revenue,
+      # invoice numbers and internal notes, none of which belongs on a phone —
+      # a field that never reaches a device cannot leak from one.
+      - SELECT "id", "event_name", "event_start", "event_end" FROM "Events" WHERE connection.parameter('app') = 'mobile' AND connection.parameter('sync_version') = 2 AND "deleted" = false AND "event_status" = 'booked'
+      - SELECT "id", "bleacher_uuid", "event_uuid" FROM "BleacherEvents" WHERE connection.parameter('app') = 'mobile' AND connection.parameter('sync_version') = 2
+      #
+      # The other drivers' progress, under an aliased output table so it lands
+      # beside — not on top of — this driver's own full WorkTrackers rows. Only
+      # what the sheet shows: which bleacher, when, what status, since when.
+      # No pay, no addresses, no POC, no notes.
+      #
+      # `bleacher_uuid` is the ASSIGNED bleacher and the only one sent. Events
+      # are booked against it; `actual_bleacher_uuid` is the equivalent unit a
+      # driver took when they could not hitch the assigned one, and it sits on
+      # a different event's calendar entirely.
+      #
+      # Drafts are excluded: work the office has not released yet is not an
+      # answer anyone should be giving an organiser.
+      #
+      # `dropoff_event_uuid` / `pickup_event_uuid` (bleacher_rentals
+      # 20260922140000, docs/specs/event-bleacher-roster.md section 4) are
+      # computed server-side, so this is what buildEventRoster now matches
+      # other drivers' trackers on directly — no JOIN added, still one static
+      # bucket, since these are plain columns on the same aliased table.
+      - SELECT "FleetTrackers"."id", "FleetTrackers"."bleacher_uuid", "FleetTrackers"."date", "FleetTrackers"."status", "FleetTrackers"."status_changed_at", "FleetTrackers"."work_tracker_type_uuid", "FleetTrackers"."dropoff_event_uuid", "FleetTrackers"."pickup_event_uuid" FROM "WorkTrackers" AS "FleetTrackers" WHERE connection.parameter('app') = 'mobile' AND connection.parameter('sync_version') = 2 AND "FleetTrackers"."status" != 'draft'
+
       # ── Driver Satisfaction Score ──────────────────────────────────────────
       # The survey the driver cannot dismiss. Definitions are reference data —
       # small, and needed in full so the question can be asked with the phone
