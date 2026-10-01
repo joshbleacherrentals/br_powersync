@@ -125,6 +125,23 @@ streams:
       - SELECT "Addresses".* FROM "Addresses" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Users".* FROM "Users" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" AS "maint_user" ON "Maintainers"."user_uuid" = "maint_user"."id" WHERE connection.parameter('app') = 'web' AND "maint_user"."clerk_user_id" = auth.user_id() AND "maint_user"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
+      # Maintainer: dashboard cells (docs/specs/maintainer-dashboard-cells.md in bleacher_rentals).
+      # Blocks is the note in a cell; a maintainer may only change the ones they wrote, which RLS
+      # decides (Blocks.created_by_user_uuid, synced with the row). The rest is what the grid reads
+      # to draw a bleacher row — read-only for a maintainer, the same data a viewer gets.
+      # Bleachers, Addresses, Users, MaintenanceEvents, BleacherMaintEvents, DamageReports and
+      # DashboardFilterSettings (own row) are already synced above.
+      - SELECT "Blocks".* FROM "Blocks" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Events".* FROM "Events" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Drivers".* FROM "Drivers" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "HomeBases".* FROM "HomeBases" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Zones".* FROM "Zones" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "SubrentalEvents".* FROM "SubrentalEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+
       # Accountant tables: accountant role. Stage 1 (docs/specs/accountant-role.md in bleacher_rentals):
       # the role has no permissions, so the only data it is sent is reference data every signed-in
       # user may read — the changelog, for the What's New page and its sidebar dot. No operational
