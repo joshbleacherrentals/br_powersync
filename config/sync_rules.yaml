@@ -98,6 +98,16 @@ streams:
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventEmailLog".* FROM "EventEmailLog" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The internal chat (docs/specs/accountant-quotes-11-accountant-internal-chat.md in bleacher_rentals):
+      # the accountant joins, reads and posts. Whole tables, as for account managers, so the device
+      # holds the messages of every event, not only those the accountant has joined. The accountant's
+      # client WRITES these rows: join, leave, post, edit its own message, read receipts, typing,
+      # mentions. The database decides which (see the migration 20261004180000).
+      - SELECT "EventMessages".* FROM "EventMessages" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventSubscriptions".* FROM "EventSubscriptions" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventMessageReadReceipts".* FROM "EventMessageReadReceipts" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventTypingIndicators".* FROM "EventTypingIndicators" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventMessageMentions".* FROM "EventMessageMentions" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Viewer: sees all Users (needed for team page, event owner names, driver display in modals)
       - SELECT "Users".* FROM "Users" JOIN "Users" AS "viewer" ON "viewer"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "viewer"."clerk_user_id" = auth.user_id() AND "viewer"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -144,9 +154,14 @@ streams:
 
       # Accountant tables: accountant role (docs/specs/accountant-work-trackers.md in bleacher_rentals).
       # The Work Trackers pages: every week, every driver, the payment window, and the work tracker
-      # details read-only. The role cannot create, edit, delete or release a work tracker, and
-      # PowerSync writes nothing for it — every payment action goes straight to Supabase. Whole
-      # tables, as for account managers; the exceptions are named below.
+      # details read-only. The role cannot create, edit, delete or release a work tracker, and its
+      # driver-payment actions go straight to Supabase, not through PowerSync. Whole tables, as for
+      # account managers; the exceptions are named below.
+      # The accountant's PowerSync client does write, though, since the quote specs: Events.is_qbo
+      # (accountant-quotes-05), manual PaymentHistory rows — record, edit, soft delete
+      # (accountant-quotes-10) — and the EventChangeLog row each of those leaves — and, since
+      # accountant-quotes-11, the internal chat's rows. The server decides, per table and column;
+      # nothing in this file grants a write.
       - SELECT "ChangeLog".* FROM "ChangeLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Drivers".* FROM "Drivers" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Vendors".* FROM "Vendors" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
