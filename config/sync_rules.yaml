@@ -23,6 +23,7 @@ streams:
       - SELECT "AccountManagers".* FROM "AccountManagers" JOIN "Users" ON "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5' WHERE connection.parameter('app') = 'web'
       - SELECT "Developers".* FROM "Developers" JOIN "Users" ON "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5' WHERE connection.parameter('app') = 'web'
       - SELECT "Maintainers".* FROM "Maintainers" JOIN "Users" ON "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5' WHERE connection.parameter('app') = 'web'
+      - SELECT "Accountants".* FROM "Accountants" JOIN "Users" ON "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5' WHERE connection.parameter('app') = 'web'
       # UserStatuses: reference data, always synced (needed to interpret status_uuid)
       - SELECT * FROM "UserStatuses" WHERE connection.parameter('app') = 'web'
       # AppVersionPolicy: reference data, synced for all users
@@ -97,6 +98,16 @@ streams:
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventEmailLog".* FROM "EventEmailLog" JOIN "Users" ON "Users"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The internal chat (docs/specs/accountant-quotes-11-accountant-internal-chat.md in bleacher_rentals):
+      # the accountant joins, reads and posts. Whole tables, as for account managers, so the device
+      # holds the messages of every event, not only those the accountant has joined. The accountant's
+      # client WRITES these rows: join, leave, post, edit its own message, read receipts, typing,
+      # mentions. The database decides which (see the migration 20261004180000).
+      - SELECT "EventMessages".* FROM "EventMessages" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventSubscriptions".* FROM "EventSubscriptions" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventMessageReadReceipts".* FROM "EventMessageReadReceipts" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventTypingIndicators".* FROM "EventTypingIndicators" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventMessageMentions".* FROM "EventMessageMentions" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Viewer: sees all Users (needed for team page, event owner names, driver display in modals)
       - SELECT "Users".* FROM "Users" JOIN "Users" AS "viewer" ON "viewer"."is_viewer" = true WHERE connection.parameter('app') = 'web' AND "viewer"."clerk_user_id" = auth.user_id() AND "viewer"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -123,6 +134,81 @@ streams:
       - SELECT "BleacherMaintEvents".* FROM "BleacherMaintEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Addresses".* FROM "Addresses" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "Users".* FROM "Users" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" AS "maint_user" ON "Maintainers"."user_uuid" = "maint_user"."id" WHERE connection.parameter('app') = 'web' AND "maint_user"."clerk_user_id" = auth.user_id() AND "maint_user"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+
+      # Maintainer: dashboard cells (docs/specs/maintainer-dashboard-cells.md in bleacher_rentals).
+      # Blocks is the note in a cell; a maintainer may only change the ones they wrote, which RLS
+      # decides (Blocks.created_by_user_uuid, synced with the row). The rest is what the grid reads
+      # to draw a bleacher row — read-only for a maintainer, the same data a viewer gets.
+      # Bleachers, Addresses, Users, MaintenanceEvents, BleacherMaintEvents, DamageReports and
+      # DashboardFilterSettings (own row) are already synced above.
+      - SELECT "Blocks".* FROM "Blocks" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Events".* FROM "Events" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Drivers".* FROM "Drivers" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "HomeBases".* FROM "HomeBases" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Zones".* FROM "Zones" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "SubrentalEvents".* FROM "SubrentalEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+
+      # Accountant tables: accountant role (docs/specs/accountant-work-trackers.md in bleacher_rentals).
+      # The Work Trackers pages: every week, every driver, the payment window, and the work tracker
+      # details read-only. The role cannot create, edit, delete or release a work tracker, and its
+      # driver-payment actions go straight to Supabase, not through PowerSync. Whole tables, as for
+      # account managers; the exceptions are named below.
+      # The accountant's PowerSync client does write, though, since the quote specs: Events.is_qbo
+      # (accountant-quotes-05), manual PaymentHistory rows — record, edit, soft delete
+      # (accountant-quotes-10) — and the EventChangeLog row each of those leaves — and, since
+      # accountant-quotes-11, the internal chat's rows. The server decides, per table and column;
+      # nothing in this file grants a write.
+      - SELECT "ChangeLog".* FROM "ChangeLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Drivers".* FROM "Drivers" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Vendors".* FROM "Vendors" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Addresses".* FROM "Addresses" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Bleachers".* FROM "Bleachers" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackers".* FROM "WorkTrackers" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackerGroups".* FROM "WorkTrackerGroups" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackerTypes".* FROM "WorkTrackerTypes" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "WorkTrackerLineItems".* FROM "WorkTrackerLineItems" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The Previous / Next Event cards in the read-only work tracker window.
+      - SELECT "Events".* FROM "Events" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "BleacherEvents".* FROM "BleacherEvents" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The Accountant page (docs/specs/accountant-quotes-02-accountant-page.md in bleacher_rentals):
+      # AR and AR Deposits are built on the device from the events above plus these. Read only —
+      # PowerSync writes nothing for the role here either. Whole tables, as for account managers.
+      - SELECT "Contacts".* FROM "Contacts" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "Companies".* FROM "Companies" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventLineItems".* FROM "EventLineItems" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "PaymentInstallments".* FROM "PaymentInstallments" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "PaymentHistory".* FROM "PaymentHistory" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "SalesOffices".* FROM "SalesOffices" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The quote card (docs/specs/accountant-quotes-04-accountant-quote-access.md in bleacher_rentals):
+      # the accountant opens a quote read-only, plus its Files tab. Venue and bleacher type names, the
+      # Log tab and the Files list. Whole tables, as for account managers. Upload and delete of a file
+      # go straight to Supabase, so PowerSync writes nothing for the role here either.
+      - SELECT "Venues".* FROM "Venues" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "BleacherTypes".* FROM "BleacherTypes" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventFiles".* FROM "EventFiles" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventChangeLog".* FROM "EventChangeLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "EventEmailLog".* FROM "EventEmailLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Users: the whole table, as for account managers, viewers and maintainers. The pages join
+      # Drivers to Users for every name they print, so a driver whose Users row is missing drops
+      # out of the list. Deliberately NOT narrowed to drivers: a `JOIN "Drivers" ON
+      # "Drivers"."user_uuid" = "Users"."id"` correlates the query with the row, the compiler then
+      # makes the bucket parameter Users.id, and every accountant client holds one bucket per
+      # driver (~90) instead of this one shared bucket. Do not add a column list either: the same
+      # Users row also arrives from the self-row bucket with `*`, and two column sets for one
+      # client-side table overwrite each other.
+      - SELECT "Users".* FROM "Users" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" AS "acct_user" ON "Accountants"."user_uuid" = "acct_user"."id" WHERE connection.parameter('app') = 'web' AND "acct_user"."clerk_user_id" = auth.user_id() AND "acct_user"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The Team page (docs/specs/accountant-team.md in bleacher_rentals): the driver page shows the
+      # zones a driver is in, read-only. Zones names them, DriverZones says which. Whole tables, the
+      # same template as the neighbours and no join to the returned row, so both merge into the
+      # shared accountant bucket instead of making one bucket per row.
+      - SELECT "Zones".* FROM "Zones" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "DriverZones".* FROM "DriverZones" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Deliberately not synced: AccountManagerZones (an accountant has no zones of its own),
+      # DriverUnavailability, Notifications, Alerts, UserAlerts, WorkTrackerInspections.
 
       # Developer tables: developer role
       - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "Developers" ON "Developers"."is_active" = true JOIN "Users" ON "Developers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
