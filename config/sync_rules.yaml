@@ -151,6 +151,20 @@ streams:
       - SELECT "StorageLocations".* FROM "StorageLocations" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "SubrentalEvents".* FROM "SubrentalEvents" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "DriverUnavailability".* FROM "DriverUnavailability" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Assets (docs/specs/maintainer-asset-documents.md in bleacher_rentals): BleacherTypes so the
+      # bleacher form finds an existing type instead of trying to create a duplicate; BlueBook is the
+      # Documents tab.
+      - SELECT "BleacherTypes".* FROM "BleacherTypes" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "BlueBook".* FROM "BlueBook" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Backlog tickets (/roadmap/backlog; docs: bleacher_rentals supabase/migrations/20261020130000_maintainer_roadmap_backlog.sql):
+      # a maintainer reads, submits and edits tickets, as an account manager does. The ticket modal
+      # needs its subscribers, chat and attachments too. Not synced: sprints, quarters, features.
+      - SELECT "RoadmapTasks".* FROM "RoadmapTasks" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "RoadmapTaskSubscriptions".* FROM "RoadmapTaskSubscriptions" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "RoadmapTaskMessages".* FROM "RoadmapTaskMessages" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "RoadmapTaskMessageReadReceipts".* FROM "RoadmapTaskMessageReadReceipts" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "RoadmapTaskTypingIndicators".* FROM "RoadmapTaskTypingIndicators" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      - SELECT "RoadmapAttachments".* FROM "RoadmapAttachments" JOIN "Maintainers" ON "Maintainers"."is_active" = true JOIN "Users" ON "Maintainers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
 
       # Accountant tables: accountant role (docs/specs/accountant-work-trackers.md in bleacher_rentals).
       # The Work Trackers pages: every week, every driver, the payment window, and the work tracker
@@ -196,6 +210,12 @@ streams:
       - SELECT "EventFiles".* FROM "EventFiles" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventChangeLog".* FROM "EventChangeLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "EventEmailLog".* FROM "EventEmailLog" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # The Contract tab's Signed banner (docs/specs/quote-detail-02-contract-signature.md in
+      # bleacher_rentals): read from this local table instead of an HTTP call, so it follows a
+      # signature and its invalidation. Read only, whole table like its neighbours; the account
+      # manager, admin and viewer streams already have it. Deploying this file makes every web client
+      # download its data again once (docs/specs/quote-detail-reactive-plan.md, F5).
+      - SELECT "ContractSignatures".* FROM "ContractSignatures" JOIN "Accountants" ON "Accountants"."is_active" = true JOIN "Users" ON "Accountants"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       # Users: the whole table, as for account managers, viewers and maintainers. The pages join
       # Drivers to Users for every name they print, so a driver whose Users row is missing drops
       # out of the list. Deliberately NOT narrowed to drivers: a `JOIN "Drivers" ON
@@ -267,6 +287,8 @@ streams:
       # Zones
       - SELECT "Zones".* FROM "Zones" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "AccountManagerZones".* FROM "AccountManagerZones" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Which zone each state or province belongs to: the Quotes & Bookings Zones filter and the Inbound Leads queue.
+      - SELECT "ZoneStateProvinces".* FROM "ZoneStateProvinces" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       # Operational tables
       - SELECT "Addresses".* FROM "Addresses" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "BleacherAnnualInspections".* FROM "BleacherAnnualInspections" JOIN "AccountManagers" ON "AccountManagers"."is_active" = true JOIN "Users" ON "AccountManagers"."user_uuid" = "Users"."id" WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
@@ -333,6 +355,8 @@ streams:
       # Zones
       - SELECT "Zones".* FROM "Zones" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "AccountManagerZones".* FROM "AccountManagerZones" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
+      # Which zone each state or province belongs to: the Quotes & Bookings Zones filter and the Inbound Leads queue.
+      - SELECT "ZoneStateProvinces".* FROM "ZoneStateProvinces" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       # Developer tables
       - SELECT "RoadmapQuarters".* FROM "RoadmapQuarters" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
       - SELECT "RoadmapSprints".* FROM "RoadmapSprints" JOIN "Users" ON "Users"."is_admin" = true WHERE connection.parameter('app') = 'web' AND "Users"."clerk_user_id" = auth.user_id() AND "Users"."status_uuid" != '7b65d5a1-8ee0-4b7a-816d-d3ec1ed123c5'
